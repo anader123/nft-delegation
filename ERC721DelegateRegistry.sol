@@ -41,8 +41,7 @@ contract ERC721DelegateRegistry {
     /// @param tokenId - ERC-721 Token ID
     /// @param owner - Current NFT Owner
     /// @param delegateAddress - New Delegate Address
-    /// @param preDelegateAddress - Previous Delegate Address
-    event DelegateSet(address contractAddress, uint tokenId, address owner, address delegateAddress, address prevDelegateAddress);
+    event DelegateSet(address contractAddress, uint tokenId, address owner, address delegateAddress);
 
     /// @notice Returns the delegate address for a given ERC-721 NFT
     /// @param _contractAddress - ERC-721 Contract Address
@@ -60,14 +59,12 @@ contract ERC721DelegateRegistry {
         address _contractAddress, 
         uint _tokenId, 
         address _delegateAddress
-    ) public (_contractAddress, _tokenId) {
+    ) public {
         address tokenOwner = IERC721(_contractAddress).ownerOf(_tokenId);
         require(msg.sender == tokenOwner); 
-
-        address prevDelegateAddress = tokenRegistry[_contractAddress][_tokenId];
         tokenRegistry[_contractAddress][_tokenId] = _delegateAddress;
 
-        emit DelegateSet(_contractAddress, _tokenId, msg.sender, _delegateAddress, prevDelegateAddress);
+        emit DelegateSet(_contractAddress, _tokenId, msg.sender, _delegateAddress);
     }
 
     /// @notice Sets the delegate address for a given ERC-721 NFT with a signature from the owner
@@ -100,10 +97,8 @@ contract ERC721DelegateRegistry {
 
         address tokenOwner = IERC721(_contractAddress).ownerOf(_tokenId);
         require(tokenOwner == hash.recover(_signature));
-
-        address prevDelegateAddress = tokenRegistry[_contractAddress][_tokenId];
         tokenRegistry[_contractAddress][_tokenId] = _delegateAddress;
 
-        emit DelegateSet(_contractAddress, _tokenId, tokenOwner, _delegateAddress, prevDelegateAddress);
+        emit DelegateSet(_contractAddress, _tokenId, tokenOwner, _delegateAddress);
     }
 }
