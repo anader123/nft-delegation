@@ -12,7 +12,7 @@ contract ERC721DelegateRegistry {
     using ECDSA for bytes32;
 
     /// @notice EIP-712 Domain Separtor
-    bytes32 private constant DOMAIN_SALT = 0x444bf2116955b97ef0f55525b1db225c5706e3ds065a400dc9094b10;
+    bytes32 private constant DOMAIN_SALT = "0x444bf2116955b97ef0f55525b1db225c5706e3ds065a400dc9094b10";
     string private constant EIP712_DOMAIN = "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)";
     bytes32 private constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
     bytes32 DOMAIN_SEPARATOR = keccak256(abi.encode(
