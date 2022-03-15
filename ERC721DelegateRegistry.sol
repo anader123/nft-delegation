@@ -7,7 +7,7 @@ interface IERC721 {
 }
 
 /// @title ERC-721 Delegate Registry
-/// @notice Allows an NFT owner to register another address to be a delegate on its behalf without having control of the NFT
+/// @notice Allows an NFT owner to register another address to be a delegate on its behalf without giving over control of the NFT
 contract ERC721DelegateRegistry {
     using ECDSA for bytes32;
 
@@ -23,11 +23,11 @@ contract ERC721DelegateRegistry {
         address(this),
         salt
     ));
-    string private constant DELEGATE_TYPE = "Delegate(address contractAddress,uint tokenId,address delegateAddress)";
+    string private constant DELEGATE_TYPE = "Delegate(address tokenAddress,uint tokenId,address delegateAddress)";
     bytes32 private constant DELEGATE_TYPEHASH = keccak256(abi.encodePacked(DELEGATE_TYPE));
 
     struct Delegate {
-        address contractAddress,
+        address tokenAddress,
         uint tokenId,
         address delegateAddress
     }
@@ -37,49 +37,49 @@ contract ERC721DelegateRegistry {
     mapping(address => mapping(uint => address)) private tokenRegistry;
 
     /// @notice Emitted whenever a new delegate address is set
-    /// @param contractAddress - ERC-721 Contract Address
+    /// @param tokenAddress - ERC-721 Contract Address
     /// @param tokenId - ERC-721 Token ID
     /// @param owner - Current NFT Owner
     /// @param delegateAddress - New Delegate Address
-    event DelegateSet(address contractAddress, uint tokenId, address owner, address delegateAddress);
+    event DelegateSet(address tokenAddress, uint tokenId, address owner, address delegateAddress);
 
     /// @notice Returns the delegate address for a given ERC-721 NFT
-    /// @param _contractAddress - ERC-721 Contract Address
+    /// @param _tokenAddress - ERC-721 Token Contract Address
     /// @param _tokenId - ERC-721 Token ID
-    function getDelegate(address _contractAddress, uint _tokenId) public view returns(address) {
-        return tokenRegistry[_contractAddress][_tokenId];
+    function getDelegate(address _tokenAddress, uint _tokenId) public view returns(address) {
+        return tokenRegistry[_tokenAddress][_tokenId];
     }
 
 
     /// @notice Sets the delegate address for a given ERC-721 NFT
-    /// @param _contractAddress - ERC-721 Contract Address
+    /// @param _tokenAddress - ERC-721 Token Contract Address
     /// @param _tokenId - ERC-721 Token ID
     /// @param _delegateAddress - Address of the new delegate
     function setDelegate(
-        address _contractAddress, 
+        address _tokenAddress, 
         uint _tokenId, 
         address _delegateAddress
     ) public {
-        address tokenOwner = IERC721(_contractAddress).ownerOf(_tokenId);
+        address tokenOwner = IERC721(_tokenAddress).ownerOf(_tokenId);
         require(msg.sender == tokenOwner); 
-        tokenRegistry[_contractAddress][_tokenId] = _delegateAddress;
+        tokenRegistry[_tokenAddress][_tokenId] = _delegateAddress;
 
-        emit DelegateSet(_contractAddress, _tokenId, msg.sender, _delegateAddress);
+        emit DelegateSet(_tokenAddress, _tokenId, msg.sender, _delegateAddress);
     }
 
     /// @notice Sets the delegate address for a given ERC-721 NFT with a signature from the owner
-    /// @param _contractAddress - ERC-721 Contract Address
+    /// @param _tokenAddress - ERC-721 Token Contract Address
     /// @param _tokenId - ERC-721 Token ID
     /// @param _delegateAddress - Address of the new delegate
     /// @param _signature - Cryptographic signature signed by the token owner
     function setDelegateWithSig(
-        address _contractAddress, 
+        address _tokenAddress, 
         uint _tokenId, 
         address _delegateAddress,
         bytes memory _signature
-    ) public (_contractAddress, _tokenId) {
+    ) public (_tokenAddress, _tokenId) {
         Delegate memory delegate = Delegate({
-            contractAddress: _contractAddress,
+            tokenAddress: _tokenAddress,
             tokenId: _tokenId,
             delegateAddress: _delegateAddress
         });
@@ -89,16 +89,16 @@ contract ERC721DelegateRegistry {
             DOMAIN_SEPARATOR,
             keccak256(abi.encode(
                 DELEGATE_TYPEHASH,
-                delegate.contractAddress,
+                delegate.tokenAddress,
                 delegate.tokenId,
                 delegate.delegateAddress
             ))
         ));
 
-        address tokenOwner = IERC721(_contractAddress).ownerOf(_tokenId);
+        address tokenOwner = IERC721(_tokenAddress).ownerOf(_tokenId);
         require(tokenOwner == hash.recover(_signature));
-        tokenRegistry[_contractAddress][_tokenId] = _delegateAddress;
+        tokenRegistry[_tokenAddress][_tokenId] = _delegateAddress;
 
-        emit DelegateSet(_contractAddress, _tokenId, tokenOwner, _delegateAddress);
+        emit DelegateSet(_tokenAddress, _tokenId, tokenOwner, _delegateAddress);
     }
 }
