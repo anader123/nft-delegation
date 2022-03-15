@@ -2,8 +2,6 @@
 
 ## Summary
 
----
-
 A minimally simple registry that allows for NFT owners to be able to delegate their ERC-721 tokens without having to hand over full control of an NFT. A `delegate` is an address that is able to enact some functionality that has been built on top of this contract without having the ability to actually transfer the delegated NFT.
 
 -   A delegate is able to sign data offchain or submit a transaction onchain to prove ownership by proxy without being able to transfer the delegated NFT
@@ -13,8 +11,6 @@ A minimally simple registry that allows for NFT owners to be able to delegate th
 <br/>
 
 ## Potential Use Cases
-
----
 
 Ideally this registry is simple and flexiable enough that many differenty types of fuctionality could be built on top.
 
@@ -68,8 +64,6 @@ Register an empty address in your mobile wallet as a delegate. Then when you arr
 
 ## Contract Interface
 
----
-
 ### getDelegate
 
 Returns the delegate address for a given ERC-721 NFT.
@@ -77,8 +71,6 @@ Returns the delegate address for a given ERC-721 NFT.
 ```
 function getDelegate(address _tokenAddress, uint _tokenId)
 ```
-
-<br/>
 
 ### setDelegate
 
@@ -92,8 +84,6 @@ function setDelegate(
 )
 ```
 
-<br/>
-
 ### setDelegateWithSig
 
 Sets the delegate address for a given ERC-721 NFT with a signature from the owner.
@@ -106,8 +96,6 @@ function setDelegateWithSig(
     bytes memory _signature
 )
 ```
-
-<br/>
 
 ### DelegateSet Event
 
