@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.8.0;
 
 import "@openzeppelin/contracts/cryptography/ECDSA.sol";
@@ -12,7 +13,7 @@ contract ERC721DelegateRegistry {
     using ECDSA for bytes32;
 
     /// @notice EIP-712 Domain Separtor
-    bytes32 private constant DOMAIN_SALT = "0x444bf2116955b97ef0f55525b1db225c5706e3ds065a400dc9094b10";
+    bytes32 private constant DOMAIN_SALT = 0xaee422d4a3edcb9b2222d503bfe733db1e3f6cdc2b7971ee739626c97e86a449;
     string private constant EIP712_DOMAIN = "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)";
     bytes32 private constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
     bytes32 DOMAIN_SEPARATOR = keccak256(abi.encode(
@@ -21,20 +22,20 @@ contract ERC721DelegateRegistry {
         keccak256("1.0"),
         keccak256("1"),
         address(this),
-        salt
+        DOMAIN_SALT
     ));
     string private constant DELEGATE_TYPE = "Delegate(address tokenAddress,uint tokenId,address delegateAddress)";
     bytes32 private constant DELEGATE_TYPEHASH = keccak256(abi.encodePacked(DELEGATE_TYPE));
 
     struct Delegate {
-        address tokenAddress,
-        uint tokenId,
-        address delegateAddress
+        address tokenAddress;
+        uint tokenId;
+        address delegateAddress;
     }
 
     /// @notice Returns a delegate for a speific NFT, if one exists
     /// @dev ERC-721 Contract Address => ERC-721 Token ID => Delegate Address
-    mapping(address => mapping(uint => address)) private tokenRegistry;
+    mapping(address => mapping(uint => address)) private tokenDelegateRegistry;
 
     /// @notice Emitted whenever a new delegate address is set
     /// @param tokenAddress - ERC-721 Contract Address
@@ -47,7 +48,7 @@ contract ERC721DelegateRegistry {
     /// @param _tokenAddress - ERC-721 Token Contract Address
     /// @param _tokenId - ERC-721 Token ID
     function getDelegate(address _tokenAddress, uint _tokenId) public view returns(address) {
-        return tokenRegistry[_tokenAddress][_tokenId];
+        return tokenDelegateRegistry[_tokenAddress][_tokenId];
     }
 
 
@@ -62,7 +63,7 @@ contract ERC721DelegateRegistry {
     ) public {
         address tokenOwner = IERC721(_tokenAddress).ownerOf(_tokenId);
         require(msg.sender == tokenOwner); 
-        tokenRegistry[_tokenAddress][_tokenId] = _delegateAddress;
+        tokenDelegateRegistry[_tokenAddress][_tokenId] = _delegateAddress;
 
         emit DelegateSet(_tokenAddress, _tokenId, msg.sender, _delegateAddress);
     }
@@ -77,7 +78,7 @@ contract ERC721DelegateRegistry {
         uint _tokenId, 
         address _delegateAddress,
         bytes memory _signature
-    ) public (_tokenAddress, _tokenId) {
+    ) public {
         Delegate memory delegate = Delegate({
             tokenAddress: _tokenAddress,
             tokenId: _tokenId,
@@ -97,7 +98,7 @@ contract ERC721DelegateRegistry {
 
         address tokenOwner = IERC721(_tokenAddress).ownerOf(_tokenId);
         require(tokenOwner == hash.recover(_signature));
-        tokenRegistry[_tokenAddress][_tokenId] = _delegateAddress;
+        tokenDelegateRegistry[_tokenAddress][_tokenId] = _delegateAddress;
 
         emit DelegateSet(_tokenAddress, _tokenId, tokenOwner, _delegateAddress);
     }
