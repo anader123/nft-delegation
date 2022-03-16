@@ -14,13 +14,13 @@ contract ERC721DelegateRegistry {
 
     /// @notice EIP-712 Domain Separtor
     bytes32 private constant DOMAIN_SALT = 0xaee422d4a3edcb9b2222d503bfe733db1e3f6cdc2b7971ee739626c97e86a449;
-    string private constant EIP712_DOMAIN = "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)";
+    string private constant EIP712_DOMAIN = "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 DOMAIN_SALT)";
     bytes32 private constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
     bytes32 DOMAIN_SEPARATOR = keccak256(abi.encode(
         EIP712_DOMAIN_TYPEHASH,
         keccak256("ERC-721 Delegate Registry"),
-        keccak256("1.0"),
-        keccak256("1"),
+        keccak256("1.0"), // Version
+        keccak256("1"), // ChainId - ETH Mainnet
         address(this),
         DOMAIN_SALT
     ));
